@@ -67,9 +67,10 @@ def ddt(x, y, z):
 
     return dxdt, dydt, dzdt
 
-# Euler method
+# Euler method. We build the whole array so we can plot nice trails
+# could clearly be optimised into calculating and rendering at the same time !
 print('Simulating ...')
-max_t = 200.0
+max_t = 25.0
 t     = 0.0
 dt    = 0.001
 
@@ -102,9 +103,12 @@ max_z = pos[:,2].max()
 steps = 100 # Frame skipping
 
 # Violently removing everything from the render directory
-shutil.rmtree('render')
+if os.path.exists('render'):
+    shutil.rmtree('render')
 os.mkdir('render')
-for i in range(Np//steps):
+Nf = Np//steps
+print('Preparing to render {} images'.format(Nf))
+for i in range(Nf):
     filename = 'img_{:05}.png'.format(i)
     print('Rendering', filename)
     plt.close('all')
@@ -118,8 +122,9 @@ for i in range(Np//steps):
     plt.savefig('render/'+filename)
     cur+=steps
 
-# Building ffmpeg command
+# Building ffmpeg command and running
 cmd = 'ffmpeg -framerate 60 -i render/img_%05d.png -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p render/movie.mp4'
 print('Converting to video :', cmd)
 subprocess.call(cmd.split())
+print('Generated movie should be in render/movie.mp4')
     
